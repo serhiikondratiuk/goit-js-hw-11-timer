@@ -117,74 +117,79 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"index.js":[function(require,module,exports) {
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+})({"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var CountdownTimer = /*#__PURE__*/function () {
-  function CountdownTimer(_ref) {
-    var targetDate = _ref.targetDate,
-        selector = _ref.selector;
-
-    _classCallCheck(this, CountdownTimer);
-
-    this.selectorRef = document.querySelector(selector);
-    this.daysRef = this.selectorRef.querySelector('[data-value="days"]');
-    this.hoursRef = this.selectorRef.querySelector('[data-value="hours"]');
-    this.minsRef = this.selectorRef.querySelector('[data-value="mins"]');
-    this.secsRef = this.selectorRef.querySelector('[data-value="secs"]');
-    this.targetDate = targetDate;
-    this.intervalID = null;
-    this.deltaTime = 0;
-    this.start();
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
   }
 
-  _createClass(CountdownTimer, [{
-    key: "start",
-    value: function start() {
-      var _this = this;
+  return bundleURL;
+}
 
-      this.intervalID = setInterval(function () {
-        var currentTime = Date.now();
-        _this.deltaTime = _this.targetDate - currentTime;
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
 
-        var days = _this.pad(Math.floor(_this.deltaTime / (1000 * 60 * 60 * 24)));
-
-        var hours = _this.pad(Math.floor(_this.deltaTime % (1000 * 60 * 60 * 24) / (1000 * 60 * 60)));
-
-        var mins = _this.pad(Math.floor(_this.deltaTime % (1000 * 60 * 60) / (1000 * 60)));
-
-        var secs = _this.pad(Math.floor(_this.deltaTime % (1000 * 60) / 1000));
-
-        _this.insertValues(days, hours, mins, secs);
-      }, 1000);
+    if (matches) {
+      return getBaseURL(matches[0]);
     }
-  }, {
-    key: "pad",
-    value: function pad(value) {
-      return String(value).padStart(2, '0');
-    }
-  }, {
-    key: "insertValues",
-    value: function insertValues(days, hours, mins, secs) {
-      this.daysRef.textContent = days;
-      this.hoursRef.textContent = hours;
-      this.minsRef.textContent = mins;
-      this.secsRef.textContent = secs;
-    }
-  }]);
+  }
 
-  return CountdownTimer;
-}();
+  return '/';
+}
 
-var timer = new CountdownTimer({
-  selector: '#timer-1',
-  targetDate: new Date('Feb 13, 2022')
-});
-},{}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)?\/[^/]+(?:\?.*)?$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],"node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
+var bundle = require('./bundle-url');
+
+function updateLink(link) {
+  var newLink = link.cloneNode();
+
+  newLink.onload = function () {
+    link.remove();
+  };
+
+  newLink.href = link.href.split('?')[0] + '?' + Date.now();
+  link.parentNode.insertBefore(newLink, link.nextSibling);
+}
+
+var cssTimeout = null;
+
+function reloadCSS() {
+  if (cssTimeout) {
+    return;
+  }
+
+  cssTimeout = setTimeout(function () {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+
+    for (var i = 0; i < links.length; i++) {
+      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
+        updateLink(links[i]);
+      }
+    }
+
+    cssTimeout = null;
+  }, 50);
+}
+
+module.exports = reloadCSS;
+},{"./bundle-url":"node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"styles.css":[function(require,module,exports) {
+var reloadCSS = require('_css_loader');
+
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -388,5 +393,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
-//# sourceMappingURL=/goit-js-hw-11-timer.e31bb0bc.js.map
+},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js"], null)
+//# sourceMappingURL=/styles.8986bff4.js.map
