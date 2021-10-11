@@ -1,0 +1,15 @@
+body {
+ font-family: 'Raleway';
+ font-size: 45px;
+}
+.timer {
+ display: flex;
+ justify-content: center;
+}
+.field {
+ display: grid;
+ text-align: center;
+}
+.field:not(:last-child) {
+ margin-right: 35px;
+}
